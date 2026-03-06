@@ -1,36 +1,87 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# ip-probe-vercel
 
-## Getting Started
+Diagnostic POC to validate real client IP propagation through Vercel proxies toward two different backend targets:
+- **Kubernetes auth-api** (via `AUTH_API_URL`)
+- **Render echo API** (via `ECHO_API_URL`)
 
-First, run the development server:
+Comparing both targets is the core of the POC — it allows isolating whether a problem is in Vercel's IP forwarding or in Kubernetes.
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+## How It Works
+
+Three API routes:
+
+| Route | Runtime | Purpose |
+|-------|---------|---------|
+| `/api/probe-edge` | Edge | Fires parallel requests to both backends, forwards Vercel IP headers |
+| `/api/probe-node` | Node.js | Same as edge but running on Node.js runtime |
+| `/api/probe-direct` | Edge | Returns all raw incoming headers — baseline before any forwarding |
+
+The dashboard compares the `remote_address` (TCP socket-level IP) and `ip_resolved_from_headers` from both backends across both runtimes.
+
+## Environment Variables
+
+| Variable | Description | Example |
+|----------|-------------|---------|
+| `AUTH_API_URL` | Base URL of the Kubernetes auth-api | `https://auth.mabible.com` |
+| `ECHO_API_URL` | Base URL of the Render echo API | `https://ip-probe-echo-api.onrender.com` |
+
+The backend endpoints called:
+- `AUTH_API_URL/ip-inspect`
+- `ECHO_API_URL/inspect`
+
+Both should return JSON with at least:
+```json
+{
+  "remote_address": "1.2.3.4",
+  "ip_resolved_from_headers": "1.2.3.4"
+}
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Local Development
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```bash
+# 1. Clone the repo
+git clone <repo-url>
+cd ip-probe-vercel
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+# 2. Install dependencies
+npm install
 
-## Learn More
+# 3. Configure environment
+cp .env.local.example .env.local
+# Edit .env.local and fill in AUTH_API_URL and ECHO_API_URL
 
-To learn more about Next.js, take a look at the following resources:
+# 4. Start dev server
+npm run dev
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Open [http://localhost:3000](http://localhost:3000)
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+> **Note:** Vercel-specific headers (`x-vercel-forwarded-for`, `x-vercel-ip-country`, etc.) are **only set on Vercel deployments**, not locally.
 
-## Deploy on Vercel
+## Deploying to Vercel
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+1. Push this repo to GitHub/GitLab/Bitbucket
+2. Go to [vercel.com/new](https://vercel.com/new) and import the repo
+3. In **Settings → Environment Variables**, add:
+   - `AUTH_API_URL` = `https://auth.mabible.com` (or your auth-api URL)
+   - `ECHO_API_URL` = `https://ip-probe-echo-api.onrender.com` (or your echo API URL)
+4. Deploy
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Interpreting Results
+
+| Observation | Diagnosis |
+|-------------|-----------|
+| Render shows real client IP, Kubernetes shows `10.x.x.x` | `externalTrafficPolicy` issue on the Kubernetes Service — set it to `Local` |
+| Both show the same non-client IP | Problem is upstream in Vercel — check proxy configuration |
+| Both show the real client IP | Everything is working correctly ✓ |
+
+## Vercel IP Headers
+
+| Header | Description |
+|--------|-------------|
+| `x-vercel-forwarded-for` | Most reliable — set by Vercel, not overwritten by proxies |
+| `x-real-ip` | Same as `x-forwarded-for` |
+| `x-forwarded-for` | Standard header, can be overwritten by upstream proxies |
+| `x-vercel-ip-country` | ISO 3166-1 country code |
+| `x-vercel-ip-city` | City name (RFC3986 encoded) |
