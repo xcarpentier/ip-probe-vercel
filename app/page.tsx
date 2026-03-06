@@ -386,6 +386,78 @@ export default function Home() {
         <button style={s.btn} onClick={handleRelancer}>↺ Relancer</button>
       </div>
 
+      {/* Architecture Diagram */}
+      <div style={{ marginBottom: '24px', background: '#161b22', border: '1px solid #30363d', borderRadius: '6px', padding: '16px' }}>
+        <h3 style={{ margin: '0 0 12px 0', fontSize: '13px', fontWeight: 'bold', color: '#e6edf3' }}>Architecture</h3>
+        <svg viewBox="0 0 900 480" style={{ width: '100%', maxHeight: '340px', display: 'block' }} xmlns="http://www.w3.org/2000/svg">
+          <rect width="900" height="480" fill="#050d18" rx="4" />
+
+          {/* Vercel zone */}
+          <rect x="195" y="75" width="285" height="340" rx="6" fill="none" stroke="#7c3aed" strokeWidth="2" />
+          <text x="280" y="62" fill="#a78bfa" fontSize="18" fontWeight="bold" fontFamily="monospace">Vercel</text>
+
+          {/* Render zone */}
+          <rect x="545" y="40" width="240" height="200" rx="6" fill="none" stroke="#16a34a" strokeWidth="2" />
+          <text x="620" y="28" fill="#4ade80" fontSize="18" fontWeight="bold" fontFamily="monospace">Render</text>
+
+          {/* Kubernetes zone */}
+          <rect x="545" y="275" width="340" height="190" rx="6" fill="none" stroke="#1d4ed8" strokeWidth="2" />
+          <text x="620" y="263" fill="#60a5fa" fontSize="18" fontWeight="bold" fontFamily="monospace">Kubernetes</text>
+
+          {/* Browser ellipse */}
+          <ellipse cx="90" cy="245" rx="75" ry="55" fill="#1a1a2e" stroke="#8b949e" strokeWidth="1.5" />
+          <text x="90" y="235" textAnchor="middle" fill="#c9d1d9" fontSize="13" fontFamily="monospace">⬜ Browser</text>
+          <text x="90" y="255" textAnchor="middle" fill="#8b949e" fontSize="13" fontFamily="monospace">A.B.C.D</text>
+
+          {/* proxy edge box */}
+          <rect x="235" y="145" width="200" height="65" rx="4" fill="#1f1035" stroke="#6d28d9" strokeWidth="1.5" />
+          <text x="335" y="182" textAnchor="middle" fill="#c9d1d9" fontSize="15" fontFamily="monospace">proxy edge</text>
+
+          {/* proxy node box */}
+          <rect x="235" y="285" width="200" height="65" rx="4" fill="#1f1035" stroke="#6d28d9" strokeWidth="1.5" />
+          <text x="335" y="322" textAnchor="middle" fill="#c9d1d9" fontSize="15" fontFamily="monospace">proxy node</text>
+
+          {/* echo-api box */}
+          <rect x="580" y="75" width="170" height="130" rx="4" fill="#0f2010" stroke="#16a34a" strokeWidth="1.5" />
+          <text x="665" y="130" textAnchor="middle" fill="#c9d1d9" fontSize="14" fontFamily="monospace">echo-api</text>
+          <text x="665" y="150" textAnchor="middle" fill="#8b949e" fontSize="13" fontFamily="monospace">/inspect</text>
+
+          {/* nginx ingress box */}
+          <rect x="575" y="305" width="155" height="65" rx="4" fill="#0d1625" stroke="#1d4ed8" strokeWidth="1.5" />
+          <text x="652" y="342" textAnchor="middle" fill="#c9d1d9" fontSize="13" fontFamily="monospace">nginx ingress</text>
+
+          {/* auth-api box */}
+          <rect x="760" y="305" width="110" height="65" rx="4" fill="#0d1625" stroke="#1d4ed8" strokeWidth="1.5" />
+          <text x="815" y="332" textAnchor="middle" fill="#c9d1d9" fontSize="12" fontFamily="monospace">auth-api</text>
+          <text x="815" y="350" textAnchor="middle" fill="#8b949e" fontSize="11" fontFamily="monospace">/ip-inspect</text>
+
+          {/* Arrow marker */}
+          <defs>
+            <marker id="arr" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+              <path d="M0,0 L0,6 L8,3 z" fill="#8b949e" />
+            </marker>
+          </defs>
+
+          {/* Browser → proxy edge */}
+          <path d="M165,225 C185,205 210,190 235,178" fill="none" stroke="#8b949e" strokeWidth="1.5" markerEnd="url(#arr)" />
+          {/* Browser → proxy node */}
+          <path d="M165,262 C185,275 210,300 235,317" fill="none" stroke="#8b949e" strokeWidth="1.5" markerEnd="url(#arr)" />
+
+          {/* proxy edge → echo-api (straight) */}
+          <path d="M435,165 C490,150 520,130 580,125" fill="none" stroke="#8b949e" strokeWidth="1.5" markerEnd="url(#arr)" />
+          {/* proxy node → echo-api (cross up) */}
+          <path d="M435,305 C490,290 520,180 580,145" fill="none" stroke="#8b949e" strokeWidth="1.5" markerEnd="url(#arr)" />
+
+          {/* proxy edge → nginx ingress (cross down) */}
+          <path d="M435,195 C490,240 520,300 575,325" fill="none" stroke="#8b949e" strokeWidth="1.5" markerEnd="url(#arr)" />
+          {/* proxy node → nginx ingress (straight) */}
+          <path d="M435,335 C490,338 520,338 575,338" fill="none" stroke="#8b949e" strokeWidth="1.5" markerEnd="url(#arr)" />
+
+          {/* nginx ingress → auth-api */}
+          <path d="M730,337 L760,337" fill="none" stroke="#8b949e" strokeWidth="1.5" markerEnd="url(#arr)" />
+        </svg>
+      </div>
+
       {/* Summary Row */}
       <div style={s.summaryRow}>
         <div style={s.summaryBox(!ipsMatch && edgeIp !== allIps[0])}>
