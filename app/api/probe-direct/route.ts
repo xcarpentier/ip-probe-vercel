@@ -23,6 +23,19 @@ export async function GET(request: NextRequest) {
   const resolvedIp =
     candidateVercelForwarded ?? candidateRealIp ?? candidateForwardedFor ?? 'unknown'
 
+  // request.geo is populated by Next.js Edge runtime from Vercel's infrastructure
+  const geo = request.geo ?? null
+
+  // Raw geo headers as sent by Vercel (for comparison with request.geo)
+  const geoHeaders = {
+    'x-vercel-ip-city': request.headers.get('x-vercel-ip-city'),
+    'x-vercel-ip-country': request.headers.get('x-vercel-ip-country'),
+    'x-vercel-ip-country-region': request.headers.get('x-vercel-ip-country-region'),
+    'x-vercel-ip-latitude': request.headers.get('x-vercel-ip-latitude'),
+    'x-vercel-ip-longitude': request.headers.get('x-vercel-ip-longitude'),
+    'x-vercel-ip-timezone': request.headers.get('x-vercel-ip-timezone'),
+  }
+
   return NextResponse.json({
     all_headers: allHeaders,
     ip_candidates: {
@@ -31,5 +44,7 @@ export async function GET(request: NextRequest) {
       candidate_forwarded_for: candidateForwardedFor,
     },
     resolved_ip: resolvedIp,
+    geo_from_request_geo: geo,
+    geo_from_headers: geoHeaders,
   })
 }
