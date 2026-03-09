@@ -26,15 +26,6 @@ interface ProbeResult {
   echo_api: BackendResult
 }
 
-interface GeoData {
-  city?: string
-  country?: string
-  countryRegion?: string
-  latitude?: string
-  longitude?: string
-  region?: string
-}
-
 interface GeoHeaders {
   'x-vercel-ip-city': string | null
   'x-vercel-ip-country': string | null
@@ -52,7 +43,6 @@ interface DirectResult {
     candidate_forwarded_for: string | null
   }
   resolved_ip: string
-  geo_from_request_geo: GeoData | null
   geo_from_headers: GeoHeaders
 }
 
@@ -516,29 +506,14 @@ export default function Home() {
         ) : direct.error ? (
           <div style={s.error}>Erreur: {direct.error}</div>
         ) : (
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
-            <div>
-              <div style={{ fontSize: '11px', color: '#58a6ff', fontWeight: 'bold', marginBottom: '8px', textTransform: 'uppercase' }}>request.geo (Next.js Edge)</div>
-              {direct.data?.geo_from_request_geo ? (
-                Object.entries(direct.data.geo_from_request_geo).map(([k, v]) => (
-                  <div key={k} style={s.field}>
-                    <span style={s.fieldLabel}>{k}: </span>
-                    <span style={{ color: '#10b981', fontWeight: 'bold' }}>{v ?? '—'}</span>
-                  </div>
-                ))
-              ) : (
-                <div style={s.error}>null — Vercel ne fournit pas de géo pour cette IP</div>
-              )}
-            </div>
-            <div>
-              <div style={{ fontSize: '11px', color: '#58a6ff', fontWeight: 'bold', marginBottom: '8px', textTransform: 'uppercase' }}>Headers bruts x-vercel-ip-*</div>
-              {direct.data?.geo_from_headers && Object.entries(direct.data.geo_from_headers).map(([k, v]) => (
-                <div key={k} style={s.field}>
-                  <span style={s.fieldLabel}>{k}: </span>
-                  <span style={{ color: v ? '#10b981' : '#f85149', fontWeight: 'bold' }}>{v ?? 'null'}</span>
-                </div>
-              ))}
-            </div>
+          <div>
+            <div style={{ fontSize: '11px', color: '#58a6ff', fontWeight: 'bold', marginBottom: '8px', textTransform: 'uppercase' }}>Headers bruts x-vercel-ip-* injectés par Vercel</div>
+            {direct.data?.geo_from_headers && Object.entries(direct.data.geo_from_headers).map(([k, v]) => (
+              <div key={k} style={s.field}>
+                <span style={s.fieldLabel}>{k}: </span>
+                <span style={{ color: v ? '#10b981' : '#f85149', fontWeight: 'bold' }}>{v ?? 'null'}</span>
+              </div>
+            ))}
           </div>
         )}
       </div>
