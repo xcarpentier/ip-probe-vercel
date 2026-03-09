@@ -22,12 +22,12 @@ export async function GET(request: NextRequest) {
     'x-forwarded-for': request.headers.get('x-forwarded-for') ?? '',
     'x-real-ip': clientIp,
     'x-vercel-forwarded-for': request.headers.get('x-vercel-forwarded-for') ?? '',
-    'x-vercel-ip-city': request.headers.get('x-vercel-ip-city') ?? '',
-    'x-vercel-ip-country': request.headers.get('x-vercel-ip-country') ?? '',
-    'x-vercel-ip-country-region': request.headers.get('x-vercel-ip-country-region') ?? '',
-    'x-vercel-ip-latitude': request.headers.get('x-vercel-ip-latitude') ?? '',
-    'x-vercel-ip-longitude': request.headers.get('x-vercel-ip-longitude') ?? '',
-    'x-vercel-ip-timezone': request.headers.get('x-vercel-ip-timezone') ?? '',
+    'x-user-city': request.headers.get('x-vercel-ip-city') ?? '',
+    'x-user-country': request.headers.get('x-vercel-ip-country') ?? '',
+    'x-user-country-region': request.headers.get('x-vercel-ip-country-region') ?? '',
+    'x-user-latitude': request.headers.get('x-vercel-ip-latitude') ?? '',
+    'x-user-longitude': request.headers.get('x-vercel-ip-longitude') ?? '',
+    'x-user-timezone': request.headers.get('x-vercel-ip-timezone') ?? '',
     'x-probe-runtime': 'node',
   }
 
